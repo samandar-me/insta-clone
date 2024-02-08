@@ -2,6 +2,8 @@ import 'package:auth_buttons/auth_buttons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:insta_qlone/page/user_detail_page.dart';
+import 'package:insta_qlone/util/navigator.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -11,6 +13,12 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+
+  final _fullName = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _passwordConfirm = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,6 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 Image.asset('assets/img/insta_text.png',width: 200,height: 200),
                 CupertinoTextField(
+                  controller: _fullName,
                   padding: EdgeInsets.all(15),
                   style: TextStyle(color: Colors.white),
                   cursorColor: Colors.white,
@@ -36,6 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const Gap(20),
                 CupertinoTextField(
+                  controller: _email,
                   padding: EdgeInsets.all(15),
                   style: TextStyle(color: Colors.white),
                   cursorColor: Colors.white,
@@ -47,6 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const Gap(20),
                 CupertinoTextField(
+                  controller: _password,
                   padding: EdgeInsets.all(15),
                   cursorColor: Colors.white,
                   obscureText: true,
@@ -59,6 +70,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const Gap(20),
                 CupertinoTextField(
+                  controller: _passwordConfirm,
                   padding: EdgeInsets.all(15),
                   cursorColor: Colors.white,
                   obscureText: true,
@@ -83,9 +95,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 const Gap(20),
                 SizedBox(
                   width: double.infinity,
-                  child: CupertinoButton(child: Text("Register",style: TextStyle(
+                  child: CupertinoButton(child: Text("Next",style: TextStyle(
                       color: Colors.white
-                  )), onPressed: () {},color: Colors.blue,),
+                  )), onPressed: () {
+                    if(_fullName.text.isNotEmpty && _email.text.isNotEmpty && _password.text == _passwordConfirm.text) {
+                      navigate(context, UserDetailPage(fullName: _fullName.text, email: _email.text, password: _password.text));
+                    }
+                  },color: Colors.blue,),
                 ),
                 const Gap(30),
                 CupertinoButton(child: Text("Already have an account? Login"), onPressed: () => Navigator.of(context).pop()),
