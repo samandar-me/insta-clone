@@ -52,4 +52,9 @@ class FbManager {
       return false;
     }
   }
+  Future<FbUser?> getSelf() async {
+    final uid = getUser()?.uid;
+    final map = await _db.ref('users').child('$uid').get();
+    return FbUser.fromJson(map.value as Map<Object?, Object?>);
+  }
 }

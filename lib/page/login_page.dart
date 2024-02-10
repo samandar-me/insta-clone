@@ -7,6 +7,7 @@ import 'package:insta_qlone/manager/fb_manager.dart';
 import 'package:insta_qlone/page/main_page.dart';
 import 'package:insta_qlone/page/register_page.dart';
 import 'package:insta_qlone/util/navigator.dart';
+import 'package:insta_qlone/widget/loading.dart';
 
 import '../util/message.dart';
 
@@ -92,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                 const Gap(20),
                 SizedBox(
                   width: double.infinity,
-                  child: _isLoading ? Center(child: CircularProgressIndicator()) : CupertinoButton(child: Text("Login",style: TextStyle(
+                  child: _isLoading ? Loading() : CupertinoButton(child: Text("Login",style: TextStyle(
                     color: Colors.white
                   )), onPressed: () {
                    if(_email.text.isNotEmpty && _password.text.isNotEmpty) {

@@ -2,6 +2,7 @@ import 'package:auth_buttons/auth_buttons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:insta_qlone/manager/fb_manager.dart';
 import 'package:insta_qlone/page/user_detail_page.dart';
 import 'package:insta_qlone/util/navigator.dart';
 

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_qlone/page/profile_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -10,10 +11,19 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
+
+  final _screens = [
+    Container(),
+    Container(),
+    Container(),
+    Container(),
+    ProfilePage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    print('working');
     return Scaffold(
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (v) => setState(() { _selectedIndex = v; }),
