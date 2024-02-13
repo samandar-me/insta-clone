@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_qlone/page/add_page.dart';
 import 'package:insta_qlone/page/profile_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -15,7 +16,7 @@ class _MainPageState extends State<MainPage> {
   final _screens = [
     Container(),
     Container(),
-    Container(),
+    AddPage(),
     Container(),
     ProfilePage(),
   ];
