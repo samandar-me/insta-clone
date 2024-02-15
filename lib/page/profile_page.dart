@@ -6,6 +6,7 @@ import 'package:insta_qlone/manager/fb_manager.dart';
 import 'package:insta_qlone/model/fb_user.dart';
 import 'package:insta_qlone/page/full_screen_image.dart';
 import 'package:insta_qlone/page/login_page.dart';
+import 'package:insta_qlone/util/message.dart';
 import 'package:insta_qlone/util/navigator.dart';
 import 'package:insta_qlone/widget/loading.dart';
 
@@ -37,11 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _successField(FbUser? user) {
     return Scaffold(
       appBar: AppBar(title: Text(user?.username ?? ""),centerTitle: true,actions: [
-        IconButton(onPressed: () {
-          _manager.logOut().then((value) {
-            navigateAndRemove(context, const LoginPage());
-          });
-        }, icon: const Icon(CupertinoIcons.power,color: Colors.red))
+        IconButton(onPressed: _logOut, icon: const Icon(Icons.exit_to_app,color: Colors.red))
       ]),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -97,10 +94,19 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         itemCount: postList.length,
         itemBuilder: (context, index) {
-          return ClipRRect(borderRadius: BorderRadius.circular(12),child: Image.network(postList[index].image ?? "",height: 120));
+          return GestureDetector(
+            onLongPress: () => _deletePost(postList[index]),
+              child: ClipRRect(borderRadius: BorderRadius.circular(12),child: Image.network(postList[index].image ?? "",height: 120)));
         },
       ),
     );
+  }
+
+  void _deletePost(Post post) {
+    _manager.deletePost(post).then((value) {
+      showSuccess(context, 'Post deleted');
+      setState(() {});
+    });
   }
 
   _buildText(int? count, String title) {
@@ -117,5 +123,18 @@ class _ProfilePageState extends State<ProfilePage> {
         Text(title)
       ],
     );
+  }
+  void _logOut() {
+    showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      title: Text("Log out?"),
+      actions: [
+        CupertinoDialogAction(child: Text("No"),onPressed: () => Navigator.of(context).pop()),
+        CupertinoDialogAction(child: Text("Yes"), isDestructiveAction: true,onPressed: () {
+          _manager.logOut().then((value) {
+            navigateAndRemove(context, const LoginPage());
+          });
+        }),
+      ],
+    ));
   }
 }
