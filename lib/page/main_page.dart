@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_qlone/page/add_page.dart';
+import 'package:insta_qlone/page/home_page.dart';
 import 'package:insta_qlone/page/profile_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -14,7 +15,7 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
   final _screens = [
-    Container(),
+    HomePage(),
     Container(),
     AddPage(),
     Container(),
@@ -37,7 +38,7 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: ''),
           BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: ''),
           BottomNavigationBarItem(icon: Icon(CupertinoIcons.add_circled), label: ''),
-          BottomNavigationBarItem(icon: Icon(CupertinoIcons.heart), label: ''),
+          BottomNavigationBarItem(icon: Icon(CupertinoIcons.shopping_cart), label: ''),
           BottomNavigationBarItem(icon: Icon(CupertinoIcons.profile_circled), label: ''),
         ],
       ),

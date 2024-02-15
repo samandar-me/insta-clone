@@ -5,7 +5,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:insta_qlone/model/post.dart';
+import 'package:insta_qlone/model/user_and_posts.dart';
 import '../model/fb_user.dart';
+import '../model/me_and_friends.dart';
 
 class FbManager {
   final _auth = FirebaseAuth.instance;
@@ -53,10 +55,12 @@ class FbManager {
       return false;
     }
   }
-  Future<FbUser?> getSelf() async {
+  Future<UserAndPosts> getSelf() async {
     final uid = getUser()?.uid;
     final map = await _db.ref('users').child('$uid').get();
-    return FbUser.fromJson(map.value as Map<Object?, Object?>);
+    final user = FbUser.fromJson(map.value as Map<Object?, Object?>);
+    final posts = await _getMyPosts();
+    return UserAndPosts(user, posts);
   }
   Future<bool> uploadPost(File imageFile, String desc) async {
     try {
@@ -65,7 +69,8 @@ class FbManager {
       final imageUrl = await uploadTask.ref.getDownloadURL(); /// getting image access url from uploaded image storage
 
       final postId = _db.ref('posts').push().key; /// this code generates new id like "3fFadajhdaH12" for our new post
-      final user = await getSelf(); /// getting self from db
+      final userAndPosts = await getSelf(); /// getting self from db
+      final user = userAndPosts.user;
       final currentDate = DateTime.now().toLocal().toString(); /// getting current time from system
       final postBody = Post(  /// creating new post to upload real time database
           id: postId,
@@ -84,7 +89,7 @@ class FbManager {
       return false; /// or returns error
     }
   }
-  Future<List<Post>> getMyPosts() async { /// getting all my posts
+  Future<List<Post>> _getMyPosts() async { /// getting all my posts
     final List<Post> postList = []; /// creating empty list with Post type
     final map = await _db.ref('posts').get(); /// get all posts from realtime database
     for(var post in map.children) { /// runs in post list
@@ -102,5 +107,17 @@ class FbManager {
     await _storage.ref('post_images/${post?.imageId}');
     await _db.ref('posts/${post?.id}').remove();
     return true;
+  }
+  Future<MeAndFriends> getMeAndFriends() async {
+    final List<FbUser> friends = [];
+    final response = await _db.ref('users').get();
+    for(var map in response.children) {
+      final friend = FbUser.fromJson(map.value as Map<Object?, Object?>);
+      if(friend.uid != getUser()?.uid) {
+        friends.add(friend);
+      }
+    }
+    final me = await getSelf();
+    return MeAndFriends(me.user, friends);
   }
 }

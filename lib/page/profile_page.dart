@@ -28,14 +28,14 @@ class _ProfilePageState extends State<ProfilePage> {
       future: _manager.getSelf(),
       builder: (context, snapshot) {
         if(snapshot.data != null) {
-          return _successField(snapshot.data);
+          return _successField(snapshot.data?.user, snapshot.data?.posts ?? []);
         }
         return const Loading();
       },
     );
   }
 
-  Widget _successField(FbUser? user) {
+  Widget _successField(FbUser? user, List<Post> posts) {
     return Scaffold(
       appBar: AppBar(title: Text(user?.username ?? ""),centerTitle: true,actions: [
         IconButton(onPressed: _logOut, icon: const Icon(Icons.exit_to_app,color: Colors.red))
@@ -60,23 +60,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     foregroundImage: NetworkImage(user?.image ?? "")
                   ),
                 ),
-                _buildText(user?.postCount, 'Posts'),
+                _buildText(posts.length, 'Posts'),
                 _buildText(user?.followerCount, 'Followers'),
                 _buildText(user?.followingCount, 'Following'),
               ],
             ),
             const Gap(30),
-            FutureBuilder(
-              future: _manager.getMyPosts(),
-              builder: (context, snapshot) {
-                if(snapshot.data != null && snapshot.data?.isNotEmpty == true) {
-                  return _successGrid(snapshot.data ?? []);
-                } else if(snapshot.data?.isEmpty == true) {
-                  return Center(child: Icon(CupertinoIcons.battery_empty));
-                }
-                return const Loading();
-              },
-            )
+            _successGrid(posts)
           ],
         ),
       ),
@@ -96,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
         itemBuilder: (context, index) {
           return GestureDetector(
             onLongPress: () => _deletePost(postList[index]),
-              child: ClipRRect(borderRadius: BorderRadius.circular(12),child: Image.network(postList[index].image ?? "",height: 120)));
+              child: ClipRRect(borderRadius: BorderRadius.circular(12),child: Image.network(postList[index].image ?? "",height: 130,fit: BoxFit.fill)));
         },
       ),
     );
