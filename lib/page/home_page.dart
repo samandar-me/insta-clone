@@ -1,9 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_qlone/manager/fb_manager.dart';
+import 'package:insta_qlone/page/chat_page.dart';
+import 'package:insta_qlone/util/navigator.dart';
 import 'package:insta_qlone/widget/loading.dart';
 import 'package:insta_qlone/widget/my_story.dart';
+import 'package:insta_qlone/widget/post_view.dart';
 import 'package:insta_qlone/widget/story_view.dart';
+
+import '../model/post.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,7 +49,9 @@ class _HomePageState extends State<HomePage> {
                           child: MyStory(image: snapshot.data?.me?.image ?? ""),
                         );
                       }
-                      return StoryView(user: snapshot.data?.friends?[index -1], onClick: () {  },);
+                      return StoryView(user: snapshot.data?.friends?[index -1], onClick: () {
+                        navigate(context, ChatPage(user: snapshot.data?.friends?[index -1]));
+                      },);
                     },
                   );
                 }
@@ -54,6 +61,26 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      body: FutureBuilder(
+        future: _manager.getAllPosts(),
+        builder: (context, snapshot) {
+          if(snapshot.data?.isNotEmpty == true) {
+            return _successField(snapshot.data ?? []);
+          } else if (snapshot.data == null) {
+            return const Center(child: Icon(CupertinoIcons.hourglass));
+          }
+          return const Loading();
+        },
+      ),
+    );
+  }
+  Widget _successField(List<Post> postList) {
+    return ListView.separated(
+      itemCount: postList.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 25),
+      itemBuilder: (context, index) {
+        return PostView(post: postList[index], onLiked: () {});
+      },
     );
   }
 }

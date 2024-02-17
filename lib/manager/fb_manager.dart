@@ -120,4 +120,8 @@ class FbManager {
     final me = await getSelf();
     return MeAndFriends(me.user, friends);
   }
+  Future<List<Post>> getAllPosts() async {
+    final snapshot = await _db.ref('posts').get();
+    return snapshot.children.map((e) => Post.fromJson(e.value as Map<Object?, Object?>)).toList().reversed.toList();
+  }
 }
