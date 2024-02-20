@@ -8,6 +8,8 @@ class FbUser {
   int? postCount;
   int? followerCount;
   int? followingCount;
+  String? lastTime;
+  bool? isOnline;
 
   FbUser.user(
   {
@@ -19,7 +21,9 @@ class FbUser {
     required this.bio,
     required this.postCount,
     required this.followerCount,
-    required this.followingCount
+    required this.followingCount,
+    required this.lastTime,
+    required this.isOnline
 }
       );
   FbUser();
@@ -33,7 +37,9 @@ class FbUser {
         password = json['password'].toString(),
         postCount = int.tryParse(json['post_count'].toString()) ?? 0, /// 3 tasi
         followingCount = int.tryParse(json['following_count'].toString()) ?? 0,
-        followerCount = int.tryParse(json['follower_count'].toString()) ?? 0;
+        followerCount = int.tryParse(json['follower_count'].toString()) ?? 0,
+       lastTime = json['last_time'].toString(),
+      isOnline = bool.tryParse(json['is_online'].toString());
 
   Map<String, dynamic> toJson() {
     return {
@@ -45,7 +51,9 @@ class FbUser {
       'bio': bio,
       'post_count': postCount, /// 3 tasi
       'following_count': followingCount,
-      'follower_count': followerCount
+      'follower_count': followerCount,
+      'last_time': lastTime,
+      'is_online': isOnline
     };
   }
 }

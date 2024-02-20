@@ -26,5 +26,7 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:54312047923:ios:b2ebf47da3f743f58dda46</string>
+	<key>DATABASE_URL</key>
+	<string>https://instaqlone-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

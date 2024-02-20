@@ -23,7 +23,7 @@ class _MessageBarState extends State<MessageBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6),
-      height: 50,
+      height: 55,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30), color: Color(0xFF262323)),
       child: TextField(
@@ -33,7 +33,7 @@ class _MessageBarState extends State<MessageBar> {
         decoration: InputDecoration(
           hintText: 'Message...',
           prefixIcon: Container(
-            margin: EdgeInsets.all(4),
+            margin: EdgeInsets.symmetric(horizontal: 2,vertical: 8),
             decoration:
                 BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
             child: IconButton(
@@ -46,7 +46,10 @@ class _MessageBarState extends State<MessageBar> {
                   onPressed: widget.onOpenGallery,
                   icon: const Icon(CupertinoIcons.photo,color: Colors.white,))
               : IconButton(
-                  onPressed: widget.onSend,
+                  onPressed: () {
+                    widget.onSend();
+                    widget.controller.text = '';
+                  },
                   icon: const Icon(CupertinoIcons.paperplane,color: Colors.white,)),
           border: InputBorder.none,
         ),
