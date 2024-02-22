@@ -27,7 +27,7 @@ class ReceiverMessage extends StatelessWidget {
           GestureDetector(
             onTap: onUserImageClicked,
             child: CircleAvatar(
-              radius: 24,
+              radius: 20,
               foregroundImage: NetworkImage(message?.ownerImage ?? ""),
               backgroundImage: const AssetImage("assets/img/img_2.png"),
             ),

@@ -29,7 +29,7 @@ class PostView extends StatelessWidget {
           ),
         ),
         const Gap(5),
-        Image.network(post.image ?? "",width: double.infinity,height: 400,fit: BoxFit.fill),
+        Image.network(post.image ?? "",width: double.infinity,height: MediaQuery.of(context).size.height / 2,fit: BoxFit.fill),
         const Gap(5),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5.0),
