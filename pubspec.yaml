@@ -46,6 +46,7 @@ dependencies:
   firebase_core: ^2.22.0
   gap: ^3.0.1
   cached_network_image: ^3.3.0
+  video_player: ^2.8.2
 
 dev_dependencies:
   flutter_test:

@@ -8,6 +8,8 @@ class Message {
   String? video;
   MessageType? type;
   String? time;
+  String? imageId;
+  String? videoId;
 
   Message(
       {required this.id,
@@ -18,6 +20,8 @@ class Message {
       required this.text,
       required this.image,
       required this.video,
+      required this.imageId,
+      required this.videoId,
       required this.time});
 
   Message.fromJson(Map<Object?, Object?> json)
@@ -28,6 +32,8 @@ class Message {
         text = json['text'].toString(),
         image = json['image'].toString(),
         video = json['video'].toString(),
+        imageId = json['image_id'].toString(),
+        videoId = json['video_id'].toString(),
         type = MessageType.values.byName(json['type'].toString()),
         time = json['time'].toString();
 
@@ -41,7 +47,9 @@ class Message {
       'time': time,
       'text': text,
       'image': image,
-      'video': video
+      'video': video,
+      'video_id': videoId,
+      'image_id': imageId,
     };
   }
 }

@@ -1,16 +1,20 @@
+import 'dart:io';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gap/gap.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:insta_qlone/manager/chat_manager.dart';
-import 'package:insta_qlone/manager/fb_manager.dart';
 import 'package:insta_qlone/model/fb_user.dart';
 import 'package:insta_qlone/model/message.dart';
 import 'package:insta_qlone/widget/loading.dart';
 import 'package:insta_qlone/widget/message_bar.dart';
 import 'package:insta_qlone/widget/receiver_message.dart';
 import 'package:insta_qlone/widget/sender_message.dart';
+
+import '../manager/fb_manager.dart';
 
 class ChatPage extends StatefulWidget {
   ChatPage({super.key, required this.user});
@@ -27,16 +31,20 @@ class _ChatPageState extends State<ChatPage> {
   final _chatManager = ChatManager();
   late ScrollController _scrollController;
   bool _isFabVisible = false;
+  final _picker = ImagePicker();
+  XFile? _cameraImage;
+  XFile? _galleryVideo;
 
-  // late DatabaseReference _reference;
-  // final _fb = FbManager();
+  late DatabaseReference _reference;
+  final _fb = FbManager();
+  bool _isImageLoading = false;
+  bool _isVideoLoading = false;
 
   @override
   void initState() {
     _scrollController = ScrollController();
-    // _reference = FirebaseDatabase.instance
-    //     .ref('chats/${_fb.getUser()?.uid}${widget.user?.uid}/messages');
-    // _listen();
+    _reference = FirebaseDatabase.instance
+        .ref('chats/${_fb.getUser()?.uid}${widget.user?.uid}/messages');
     _listener();
     super.initState();
   }
@@ -96,14 +104,14 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Expanded(
               child: StreamBuilder(
-                //  stream: _reference.onValue,
-                  stream: _chatManager.getMessages(widget.user?.uid),
-                  builder: (context, snapshot) {
-                    final messageList = snapshot.data?.children
+                  stream: _reference.onValue,// _chatManager.getMessages(widget.user?.uid),
+                  builder: (context, s) {
+                    final snapshot = s.data?.snapshot;
+                    final messageList = snapshot?.children
                         .map((e) =>
                         Message.fromJson(e.value as Map<Object?, Object?>))
                         .toList();
-                    if (snapshot.data != null &&
+                    if (snapshot != null &&
                         messageList?.isNotEmpty == true) {
                       return ListView.builder(
                         controller: _scrollController,
@@ -135,9 +143,11 @@ class _ChatPageState extends State<ChatPage> {
                   }),
             ),
             MessageBar(
+              isImageLoading: _isImageLoading,
+              isVideoLoading: _isVideoLoading,
                 controller: _controller,
-                onOpenCamera: () {},
-                onOpenGallery: () {},
+                onOpenCamera: _openCamera,
+                onOpenGallery: _openVideo,
                 onSend: _sendTextMsg),
             const Gap(8)
           ],
@@ -156,6 +166,30 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  void _openVideo() async {
+    setState(() {
+      _isVideoLoading = true;
+    });
+    final media = await _picker.pickMedia();
+    if(media?.name.endsWith(".mp4") == true) {
+      _galleryVideo = media;
+      _chatManager.sendVideo(File(_galleryVideo?.path ?? ""), widget.user?.uid).then((value) {
+        _scrollList();
+      });
+    } else {
+      _cameraImage = media;
+      _chatManager.sendImage(File(_cameraImage?.path ?? ""), widget.user?.uid).then((value) {
+        _scrollList();
+      });
+    }
+  }
+
+  _sendImageMsg() {
+    _chatManager.sendImage(File(_cameraImage?.path ?? ""), widget.user?.uid).then((value) {
+      _scrollList();
+    });
+  }
+
   void _sendTextMsg() {
     _chatManager
         .sendTextMessage(_controller.text, widget.user?.uid)
@@ -165,11 +199,23 @@ class _ChatPageState extends State<ChatPage> {
     _controller.text = '';
   }
 
+  void _openCamera() async {
+    _cameraImage = await _picker.pickImage(source: ImageSource.camera);
+    if(_cameraImage != null) {
+      setState(() {
+        _isImageLoading = true;
+      });
+      _sendImageMsg();
+    }
+  }
+
   void _scrollList() {
     setState(() {});
     Future.delayed(const Duration(milliseconds: 1000)).then((value) {
       _scrollController.animateTo(_scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+      _isImageLoading = false;
+      _isVideoLoading = false;
     });
   }
   void _scrollList2() {

@@ -7,12 +7,16 @@ class MessageBar extends StatefulWidget {
       required this.controller,
       required this.onOpenCamera,
       required this.onOpenGallery,
+        required this.isImageLoading,
+        required this.isVideoLoading,
       required this.onSend});
 
   final void Function() onOpenCamera;
   final void Function() onOpenGallery;
   final void Function() onSend;
   final TextEditingController controller;
+  final bool isImageLoading;
+  final bool isVideoLoading;
 
   @override
   State<MessageBar> createState() => _MessageBarState();
@@ -32,7 +36,9 @@ class _MessageBarState extends State<MessageBar> {
         cursorColor: Colors.white,
         decoration: InputDecoration(
           hintText: 'Message...',
-          prefixIcon: Container(
+          prefixIcon: widget.isImageLoading ? const CupertinoActivityIndicator(
+            color: Colors.white,
+          ) : Container(
             margin: EdgeInsets.symmetric(horizontal: 2,vertical: 8),
             decoration:
                 BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
@@ -41,7 +47,9 @@ class _MessageBarState extends State<MessageBar> {
                 icon: const Icon(CupertinoIcons.camera,color: Colors.white)
             ),
           ),
-          suffixIcon: widget.controller.text.isEmpty
+          suffixIcon: widget.isVideoLoading ? const CupertinoActivityIndicator(
+            color: Colors.white,
+          ) : widget.controller.text.isEmpty
               ? IconButton(
                   onPressed: widget.onOpenGallery,
                   icon: const Icon(CupertinoIcons.photo,color: Colors.white,))

@@ -1,17 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:video_player/video_player.dart';
 
 import '../model/message.dart';
 import 'loading.dart';
 
-class ReceiverMessage extends StatelessWidget {
+class ReceiverMessage extends StatefulWidget {
   const ReceiverMessage(
       {super.key,
-        required this.message,
-        required this.onImageOpen,
-        required this.onVideoOpen,
-        required this.onUserImageClicked});
+      required this.message,
+      required this.onImageOpen,
+      required this.onVideoOpen,
+      required this.onUserImageClicked});
 
   final Message? message;
   final void Function() onImageOpen;
@@ -19,16 +20,37 @@ class ReceiverMessage extends StatelessWidget {
   final VoidCallback onUserImageClicked;
 
   @override
+  State<ReceiverMessage> createState() => _ReceiverMessageState();
+}
+
+class _ReceiverMessageState extends State<ReceiverMessage> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.message?.video ?? ""));
+    _controller.setLooping(true);
+    _controller.initialize();
+    _controller.play();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Row(
         children: [
           GestureDetector(
-            onTap: onUserImageClicked,
+            onTap: widget.onUserImageClicked,
             child: CircleAvatar(
               radius: 20,
-              foregroundImage: NetworkImage(message?.ownerImage ?? ""),
+              foregroundImage: NetworkImage(widget.message?.ownerImage ?? ""),
               backgroundImage: const AssetImage("assets/img/img_2.png"),
             ),
           ),
@@ -47,14 +69,15 @@ class ReceiverMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (message?.type == MessageType.text)
+                if (widget.message?.type == MessageType.text)
                   ConstrainedBox(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width - 100),
-                    child: Text(message?.text ?? "",
-                        style: const TextStyle(fontSize: 18, color: Colors.white)),
+                    child: Text(widget.message?.text ?? "",
+                        style:
+                            const TextStyle(fontSize: 18, color: Colors.white)),
                   )
-                else if (message?.type == MessageType.photo)
+                else if (widget.message?.type == MessageType.photo)
                   ConstrainedBox(
                     constraints: BoxConstraints(
                         minHeight: 100.0,
@@ -62,42 +85,30 @@ class ReceiverMessage extends StatelessWidget {
                         maxHeight: 300.0,
                         maxWidth: MediaQuery.of(context).size.width - 100),
                     child: GestureDetector(
-                      onTap: onImageOpen,
+                      onTap: widget.onImageOpen,
                       child: CachedNetworkImage(
-                        imageUrl: message?.image ?? "",
-                        placeholder: (context, url) =>
-                        const Loading(),
+                        imageUrl: widget.message?.image ?? "",
+                        placeholder: (context, url) => const Loading(),
                         errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
+                            const Icon(Icons.error),
                         fit: BoxFit.cover,
                       ),
                     ),
+                  )
+                else if (widget.message?.type == MessageType.video)
+                  Padding(
+                    padding: EdgeInsets.only(left: 30),
+                    child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      // width: MediaQuery.of(context).size.width - 100,
+                      // height: 300,
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: VideoPlayer(_controller)),
+                    ),
                   ),
-                // else if (message?.type == MessageType.video)
-                //     SizedBox(
-                //       width: MediaQuery.of(context).size.width - 100,
-                //       child: Row(
-                //         mainAxisSize: MainAxisSize.min,
-                //         crossAxisAlignment: CrossAxisAlignment.center,
-                //         mainAxisAlignment: MainAxisAlignment.center,
-                //         children: [
-                //           IconButton(
-                //               onPressed: onFileOpen,
-                //               icon: const Icon(
-                //                 Icons.file_present_rounded,
-                //                 color: Colors.white,
-                //               )),
-                //           Flexible(
-                //               child: Text(message?.fileName ?? "",
-                //                   style: const TextStyle(
-                //                       fontSize: 15, color: Colors.white),
-                //                   maxLines: 1,
-                //                   overflow: TextOverflow.ellipsis))
-                //         ],
-                //       ),
-                //     ),
                 const Gap(5),
-                Text(message?.time ?? "",
+                Text(widget.message?.time ?? "",
                     style: const TextStyle(fontSize: 12, color: Colors.white))
               ],
             ),
