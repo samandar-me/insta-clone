@@ -58,14 +58,15 @@ class _ReceiverMessageState extends State<ReceiverMessage> {
           Container(
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Color(0xFF262323), // Color for sender messages
+            decoration: widget.message?.type == MessageType.text ? const BoxDecoration(
+              color:          Color(0xFF262323), // Color for sender messages
               borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4),
+                  topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
-                  topRight: Radius.circular(16)),
-            ),
+                  topRight: Radius.circular(4)
+              ),
+            ) : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -86,12 +87,15 @@ class _ReceiverMessageState extends State<ReceiverMessage> {
                         maxWidth: MediaQuery.of(context).size.width - 100),
                     child: GestureDetector(
                       onTap: widget.onImageOpen,
-                      child: CachedNetworkImage(
-                        imageUrl: widget.message?.image ?? "",
-                        placeholder: (context, url) => const Loading(),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                        fit: BoxFit.cover,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.message?.image ?? "",
+                          placeholder: (context, url) => const Loading(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   )
@@ -100,8 +104,6 @@ class _ReceiverMessageState extends State<ReceiverMessage> {
                     padding: EdgeInsets.only(left: 30),
                     child: AspectRatio(
                       aspectRatio: _controller.value.aspectRatio,
-                      // width: MediaQuery.of(context).size.width - 100,
-                      // height: 300,
                       child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: VideoPlayer(_controller)),

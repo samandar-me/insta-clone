@@ -49,7 +49,7 @@ class _MessageBarState extends State<MessageBar> {
           ),
           suffixIcon: widget.isVideoLoading ? const CupertinoActivityIndicator(
             color: Colors.white,
-          ) : widget.controller.text.isEmpty
+          ) : widget.controller.text.trim().isEmpty
               ? IconButton(
                   onPressed: widget.onOpenGallery,
                   icon: const Icon(CupertinoIcons.photo,color: Colors.white,))

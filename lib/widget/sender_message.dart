@@ -10,7 +10,7 @@ import 'loading.dart';
 class SenderMessage extends StatefulWidget {
   const SenderMessage({super.key, required this.message, required this.onMessageClicked, required this.onVideoOpen, required this.onImageOpen});
   final Message? message;
-  final void Function() onMessageClicked;
+  final void Function(TapDownDetails) onMessageClicked;
   final void Function() onVideoOpen;
   final void Function() onImageOpen;
 
@@ -39,21 +39,21 @@ class _SenderMessageState extends State<SenderMessage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: widget.onMessageClicked,
+      onTapDown: widget.message?.type == MessageType.text ? widget.onMessageClicked : null,
       child: Align(
         alignment: Alignment.centerRight,
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 4.0),
-          padding: const EdgeInsets.all(4.0),
-          // decoration: const BoxDecoration(
-          //   color: CupertinoColors.activeBlue, // Color for sender messages
-          //   borderRadius: BorderRadius.only(
-          //       topLeft: Radius.circular(16),
-          //       bottomLeft: Radius.circular(16),
-          //       bottomRight: Radius.circular(16),
-          //       topRight: Radius.circular(4)
-          //   ),
-          // ),
+          padding: const EdgeInsets.all(8.0),
+          decoration: widget.message?.type == MessageType.text ? const BoxDecoration(
+            color: CupertinoColors.activeBlue, // Color for sender messages
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+                topRight: Radius.circular(4)
+            ),
+          ) : null,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -73,24 +73,30 @@ class _SenderMessageState extends State<SenderMessage> {
                       maxWidth: MediaQuery.of(context).size.width - 100),
                   child: GestureDetector(
                     onTap: widget.onImageOpen,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.message?.image ?? "",
-                      placeholder: (context, url) =>
-                      const Loading(),
-                      errorWidget: (context, url, error) =>
-                      const Icon(Icons.error),
-                      fit: BoxFit.cover,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: CachedNetworkImage(
+                        imageUrl: widget.message?.image ?? "",
+                        placeholder: (context, url) =>
+                        const Loading(),
+                        errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 )
               else if (widget.message?.type == MessageType.video)
-                  Padding(
-                    padding: EdgeInsets.only(left: 30),
-                    child: AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      // width: MediaQuery.of(context).size.width - 100,
-                      // height: 300,
-                      child: ClipRRect(borderRadius: BorderRadius.circular(12),child: VideoPlayer(_controller)),
+                  GestureDetector(
+                    onTap: widget.onVideoOpen,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 30),
+                      child: AspectRatio(
+                        aspectRatio: _controller.value.aspectRatio,
+                        // width: MediaQuery.of(context).size.width - 100,
+                        // height: 300,
+                        child: ClipRRect(borderRadius: BorderRadius.circular(12),child: VideoPlayer(_controller)),
+                      ),
                     ),
                   ),
               const Gap(5),

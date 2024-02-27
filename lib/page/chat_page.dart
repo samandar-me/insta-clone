@@ -4,11 +4,15 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta_qlone/manager/chat_manager.dart';
 import 'package:insta_qlone/model/fb_user.dart';
 import 'package:insta_qlone/model/message.dart';
+import 'package:insta_qlone/page/receiver_profile_page.dart';
+import 'package:insta_qlone/util/message.dart';
+import 'package:insta_qlone/util/navigator.dart';
 import 'package:insta_qlone/widget/loading.dart';
 import 'package:insta_qlone/widget/message_bar.dart';
 import 'package:insta_qlone/widget/receiver_message.dart';
@@ -35,6 +39,9 @@ class _ChatPageState extends State<ChatPage> {
   XFile? _cameraImage;
   XFile? _galleryVideo;
 
+  bool _isEdited = false;
+  Message? _editedMessage;
+
   late DatabaseReference _reference;
   final _fb = FbManager();
   bool _isImageLoading = false;
@@ -52,7 +59,8 @@ class _ChatPageState extends State<ChatPage> {
   void _listener() {
     _scrollController.addListener(() {
       setState(() {
-        _isFabVisible = _scrollController.position.userScrollDirection == ScrollDirection.reverse;
+        _isFabVisible = _scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse;
       });
     });
   }
@@ -81,7 +89,7 @@ class _ChatPageState extends State<ChatPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: () {},
+              onTap: () => navigate(context, ReceiverProfilePage(user: widget.user)),
               child: CircleAvatar(
                 radius: 20,
                 foregroundImage: NetworkImage(widget.user?.image ?? ""),
@@ -104,15 +112,15 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Expanded(
               child: StreamBuilder(
-                  stream: _reference.onValue,// _chatManager.getMessages(widget.user?.uid),
+                  stream: _reference.onValue,
+                  // _chatManager.getMessages(widget.user?.uid),
                   builder: (context, s) {
                     final snapshot = s.data?.snapshot;
                     final messageList = snapshot?.children
                         .map((e) =>
-                        Message.fromJson(e.value as Map<Object?, Object?>))
+                            Message.fromJson(e.value as Map<Object?, Object?>))
                         .toList();
-                    if (snapshot != null &&
-                        messageList?.isNotEmpty == true) {
+                    if (snapshot != null && messageList?.isNotEmpty == true) {
                       return ListView.builder(
                         controller: _scrollController,
                         itemCount: messageList?.length,
@@ -120,13 +128,15 @@ class _ChatPageState extends State<ChatPage> {
                           if (widget.user?.uid != messageList?[index].ownerId) {
                             return SenderMessage(
                                 message: messageList?[index],
-                                onMessageClicked: () {},
+                                onMessageClicked: (details) {
+                                  _showMenu(details, messageList?[index]);
+                                },
                                 onVideoOpen: () {},
                                 onImageOpen: () {});
                           } else {
                             return ReceiverMessage(
                                 message: messageList?[index],
-                                onUserImageClicked: () {},
+                                onUserImageClicked: () => navigate(context, ReceiverProfilePage(user: widget.user)),
                                 onVideoOpen: () {},
                                 onImageOpen: () {});
                           }
@@ -135,35 +145,95 @@ class _ChatPageState extends State<ChatPage> {
                     } else if (messageList?.isEmpty == true) {
                       return const Center(
                           child: Text(
-                            "Say Hello",
-                            style: TextStyle(fontSize: 22),
-                          ));
+                        "Say Hello",
+                        style: TextStyle(fontSize: 22),
+                      ));
                     }
                     return Loading();
                   }),
             ),
+            if(_isEdited)
+              ListTile(
+                leading: Icon(CupertinoIcons.pencil),
+                title: Text(_editedMessage?.text ?? ""),
+                trailing: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isEdited = false;
+                      _editedMessage = null;
+                      _controller.text = '';
+                    });
+                  },
+                  icon: Icon(Icons.close),
+                ),
+              ),
             MessageBar(
-              isImageLoading: _isImageLoading,
-              isVideoLoading: _isVideoLoading,
+                isImageLoading: _isImageLoading,
+                isVideoLoading: _isVideoLoading,
                 controller: _controller,
                 onOpenCamera: _openCamera,
                 onOpenGallery: _openVideo,
-                onSend: _sendTextMsg),
+                onSend: _sendOrEdit),
             const Gap(8)
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _isFabVisible ? Padding(
-        padding: const EdgeInsets.only(bottom: 70.0),
-        child: FloatingActionButton.small(
-          onPressed: _scrollList2,
-          shape: CircleBorder(),
-          child: const Icon(CupertinoIcons.down_arrow),
-          backgroundColor: Colors.blue,
-        ),
-      ) : null,
+      floatingActionButton: _isFabVisible
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 70.0),
+              child: FloatingActionButton.small(
+                onPressed: _scrollList2,
+                shape: CircleBorder(),
+                child: const Icon(CupertinoIcons.down_arrow),
+                backgroundColor: Colors.blue,
+              ),
+            )
+          : null,
     );
+  }
+
+  void _showMenu(TapDownDetails details, Message? message) {
+    final offset = details.globalPosition;
+    showMenu(
+        context: context,
+        position: RelativeRect.fromLTRB(
+          offset.dx,
+          offset.dy,
+          MediaQuery.of(context).size.width - offset.dx,
+          MediaQuery.of(context).size.height - offset.dy,
+        ),
+        items: [
+          PopupMenuItem(
+            child: ListTile(trailing: Icon(Icons.copy), title: Text("Copy")),
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: message?.text ?? ""))
+                  .then((value) {
+                showSuccess(context, 'Copied');
+              });
+            },
+          ),
+          PopupMenuItem(
+            child: ListTile(trailing: Icon(Icons.edit), title: Text("Edit")),
+            onTap: () {
+              setState(() {
+                _controller.text = message?.text ?? "";
+                _isEdited = true;
+                _editedMessage = message;
+              });
+            },
+          ),
+          PopupMenuItem(
+            onTap: () {
+              _deleteText(message);
+            },
+              child: ListTile(
+                  trailing: Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                  title: Text("Delete", style: TextStyle(color: Colors.red))))
+        ]);
   }
 
   void _openVideo() async {
@@ -171,37 +241,62 @@ class _ChatPageState extends State<ChatPage> {
       _isVideoLoading = true;
     });
     final media = await _picker.pickMedia();
-    if(media?.name.endsWith(".mp4") == true) {
+    if (media?.name.endsWith(".mp4") == true) {
       _galleryVideo = media;
-      _chatManager.sendVideo(File(_galleryVideo?.path ?? ""), widget.user?.uid).then((value) {
+      _chatManager
+          .sendVideo(File(_galleryVideo?.path ?? ""), widget.user?.uid)
+          .then((value) {
         _scrollList();
       });
     } else {
       _cameraImage = media;
-      _chatManager.sendImage(File(_cameraImage?.path ?? ""), widget.user?.uid).then((value) {
+      _chatManager
+          .sendImage(File(_cameraImage?.path ?? ""), widget.user?.uid)
+          .then((value) {
         _scrollList();
       });
     }
   }
 
   _sendImageMsg() {
-    _chatManager.sendImage(File(_cameraImage?.path ?? ""), widget.user?.uid).then((value) {
+    _chatManager
+        .sendImage(File(_cameraImage?.path ?? ""), widget.user?.uid)
+        .then((value) {
       _scrollList();
     });
   }
 
-  void _sendTextMsg() {
-    _chatManager
-        .sendTextMessage(_controller.text, widget.user?.uid)
-        .then((value) {
-      _scrollList();
+  void _deleteText(Message? message) async {
+    await _chatManager.deleteText(message);
+    setState(() {
+
     });
-    _controller.text = '';
+  }
+
+  void _sendOrEdit() {
+    if(_isEdited) {
+      _chatManager
+          .editText(_editedMessage, _controller.text)
+          .then((value) {
+     setState(() {
+       _controller.text = '';
+       _isEdited = false;
+       _editedMessage = null;
+     });
+      });
+    } else {
+      _chatManager
+          .sendTextMessage(_controller.text, widget.user?.uid)
+          .then((value) {
+        _scrollList();
+      });
+      _controller.text = '';
+    }
   }
 
   void _openCamera() async {
     _cameraImage = await _picker.pickImage(source: ImageSource.camera);
-    if(_cameraImage != null) {
+    if (_cameraImage != null) {
       setState(() {
         _isImageLoading = true;
       });
@@ -218,6 +313,7 @@ class _ChatPageState extends State<ChatPage> {
       _isVideoLoading = false;
     });
   }
+
   void _scrollList2() {
     _scrollController.animateTo(_scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
