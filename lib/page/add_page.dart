@@ -104,7 +104,6 @@ class _AddPageState extends State<AddPage> {
     );
   }
   void _launchGallery() async {
-    _controller.dispose();
     final file = await _picker.pickMedia();
     if(file != null) {
       xFile = file;
@@ -116,7 +115,6 @@ class _AddPageState extends State<AddPage> {
   void _playVideo() {
     if(_isVideo) {
       _controller = VideoPlayerController.file(File(xFile?.path ?? ""));
-      print('worked');
       _controller.setLooping(true);
       _controller.initialize();
       _controller.play();

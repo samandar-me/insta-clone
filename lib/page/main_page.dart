@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:insta_qlone/page/add_page.dart';
 import 'package:insta_qlone/page/home_page.dart';
 import 'package:insta_qlone/page/profile_page.dart';
+import 'package:insta_qlone/page/reels_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -18,7 +19,7 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     Container(),
     AddPage(),
-    Container(),
+    ReelsPage(),
     ProfilePage(),
   ];
 

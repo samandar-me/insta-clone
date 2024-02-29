@@ -59,12 +59,12 @@ class _ReceiverMessageState extends State<ReceiverMessage> {
             margin: const EdgeInsets.symmetric(vertical: 4.0),
             padding: const EdgeInsets.all(8.0),
             decoration: widget.message?.type == MessageType.text ? const BoxDecoration(
-              color:          Color(0xFF262323), // Color for sender messages
+              color: Color(0xFF262323), // Color for sender messages
               borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
+                  topLeft: Radius.circular(4),
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
-                  topRight: Radius.circular(4)
+                  topRight: Radius.circular(16)
               ),
             ) : null,
             child: Column(

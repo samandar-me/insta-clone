@@ -144,4 +144,17 @@ class FbManager {
     final snapshot = await _db.ref('posts').get();
     return snapshot.children.map((e) => Post.fromJson(e.value as Map<Object?, Object?>)).toList().reversed.toList();
   }
+  Future<List<Post>> getReelsVideos() async {
+    final List<Post> videoList = [];
+    final snapshot = await _db.ref('posts').get();
+    for(var map in snapshot.children) {
+      final post = Post.fromJson(map.value as Map<Object?, Object?>);
+      if(post.video != null) {
+        print(post.id);
+        videoList.add(post);
+      }
+    }
+    print(videoList.length);
+    return videoList;
+  }
 }
