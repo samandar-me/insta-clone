@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:insta_qlone/model/message.dart';
 import 'package:insta_qlone/model/post.dart';
 import 'package:insta_qlone/model/user_and_posts.dart';
 import '../model/fb_user.dart';
@@ -62,11 +63,18 @@ class FbManager {
     final posts = await _getMyPosts();
     return UserAndPosts(user, posts);
   }
-  Future<bool> uploadPost(File imageFile, String desc) async {
+  Future<UserAndPosts> getInfo(FbUser? fbUser) async {
+    final map = await _db.ref('users').child('${fbUser?.uid}').get();
+    final user = FbUser.fromJson(map.value as Map<Object?, Object?>);
+    final posts = await _getItPosts(fbUser);
+    return UserAndPosts(user, posts);
+  }
+  Future<bool> uploadPost(File file, String desc) async {
     try {
-      final imageId = DateTime.now().microsecondsSinceEpoch.toString(); /// identification for post image
-      final uploadTask = await _storage.ref('post_images').child(imageId).putFile(imageFile); /// task of uploading image to storage
-      final imageUrl = await uploadTask.ref.getDownloadURL(); /// getting image access url from uploaded image storage
+      final type = file.path.endsWith('.mp4') ? MessageType.video : MessageType.photo;
+      final mediaId = DateTime.now().microsecondsSinceEpoch.toString(); /// identification for post image
+      final uploadTask = await _storage.ref('post_images').child(mediaId).putFile(file); /// task of uploading image to storage
+      final mediaUrl = await uploadTask.ref.getDownloadURL(); /// getting image access url from uploaded image storage
 
       final postId = _db.ref('posts').push().key; /// this code generates new id like "3fFadajhdaH12" for our new post
       final userAndPosts = await getSelf(); /// getting self from db
@@ -74,13 +82,14 @@ class FbManager {
       final currentDate = DateTime.now().toLocal().toString(); /// getting current time from system
       final postBody = Post(  /// creating new post to upload real time database
           id: postId,
-          image: imageUrl,
+          image: type == MessageType.photo ? mediaUrl : null,
+          video: type == MessageType.video ? mediaUrl : null,
           desc: desc,
           ownerName: user?.username,
           ownerImage: user?.image,
           ownerId: user?.uid,
           date: currentDate,
-          imageId: imageId);
+          mediaId: mediaId);
 
       await _db.ref('posts/$postId').set(postBody.toJson()); /// upload to realtime database our new post
       return true; /// if these operations becomes success, returns true
@@ -100,11 +109,22 @@ class FbManager {
     }
     return postList; /// returns filtered post list
   }
+  Future<List<Post>> _getItPosts(FbUser? fbUser) async { /// getting all my posts
+    final List<Post> postList = []; /// creating empty list with Post type
+    final map = await _db.ref('posts').get(); /// get all posts from realtime database
+    for(var post in map.children) { /// runs in post list
+      final mapValue = Post.fromJson(post.value as Map<Object?, Object?>); /// converts map to post class
+      if(mapValue.ownerId == fbUser?.uid) { /// checks each post that belong to self
+        postList.add(mapValue); /// adds each post after that post is self
+      }
+    }
+    return postList; /// returns filtered post list
+  }
   Future<void> logOut() async {
     await _auth.signOut(); /// the end
   }
   Future<bool> deletePost(Post? post) async {
-    await _storage.ref('post_images/${post?.imageId}');
+    await _storage.ref('post_images/${post?.mediaId}');
     await _db.ref('posts/${post?.id}').remove();
     return true;
   }

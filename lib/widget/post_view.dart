@@ -1,7 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:insta_qlone/model/post.dart';
+
+import 'loading.dart';
 
 class PostView extends StatelessWidget {
   const PostView({super.key, required this.post, required this.onLiked});
@@ -29,7 +32,16 @@ class PostView extends StatelessWidget {
           ),
         ),
         const Gap(5),
-        Image.network(post.image ?? "",width: double.infinity,height: MediaQuery.of(context).size.height / 2,fit: BoxFit.fill),
+        CachedNetworkImage(
+          height: MediaQuery.of(context).size.height / 2,
+          width: double.infinity,
+          imageUrl: post.image ?? "",
+          placeholder: (context, url) =>
+          const Loading(),
+          errorWidget: (context, url, error) =>
+          const Icon(Icons.error),
+          fit: BoxFit.cover,
+        ),
         const Gap(5),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5.0),

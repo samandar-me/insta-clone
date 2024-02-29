@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:insta_qlone/manager/fb_manager.dart';
+import 'package:insta_qlone/model/message.dart';
 import 'package:insta_qlone/page/main_page.dart';
 import 'package:insta_qlone/util/message.dart';
 import 'package:insta_qlone/util/navigator.dart';
 import 'package:insta_qlone/widget/loading.dart';
+import 'package:video_player/video_player.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -23,8 +25,17 @@ class _AddPageState extends State<AddPage> {
   XFile? xFile;
   final _desc = TextEditingController();
   final _manager = FbManager();
+  bool _isVideo = false;
 
   bool _isLoading = false;
+
+  late VideoPlayerController _controller;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _uploadNewPost() {
     if(xFile == null || _desc.text.isEmpty) {
@@ -87,17 +98,28 @@ class _AddPageState extends State<AddPage> {
               border: Border.all(color: Colors.white),
             borderRadius: BorderRadius.circular(12)
           ),
-          child: xFile == null ? const Icon(CupertinoIcons.photo,color: Colors.white) :
-          ClipRRect(borderRadius: BorderRadius.circular(12),child: Image.file(File(xFile?.path ?? ""),fit: BoxFit.cover)),
+          child: xFile == null ? const Icon(CupertinoIcons.photo,color: Colors.white) : _isVideo ? VideoPlayer(_controller) :
+          ClipRRect(borderRadius: BorderRadius.circular(12),child: Image.file(File(xFile?.path ?? ""),fit: BoxFit.cover)) ,
         )
     );
   }
   void _launchGallery() async {
-    final file = await _picker.pickImage(source: ImageSource.gallery);
+    _controller.dispose();
+    final file = await _picker.pickMedia();
     if(file != null) {
-      setState(() {
-        xFile = file;
-      });
+      xFile = file;
+      _isVideo = xFile?.name.endsWith(".mp4") ?? false;
+      _playVideo();
+      setState(() {});
+    }
+  }
+  void _playVideo() {
+    if(_isVideo) {
+      _controller = VideoPlayerController.file(File(xFile?.path ?? ""));
+      print('worked');
+      _controller.setLooping(true);
+      _controller.initialize();
+      _controller.play();
     }
   }
 }
