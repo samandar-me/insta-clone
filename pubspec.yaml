@@ -47,6 +47,8 @@ dependencies:
   gap: ^3.0.1
   cached_network_image: ^3.3.0
   video_player: ^2.8.2
+  lottie: ^3.1.0
+  share_plus: ^7.2.2
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +91,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/img/
+     - assets/json/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

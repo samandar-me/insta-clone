@@ -149,12 +149,10 @@ class FbManager {
     final snapshot = await _db.ref('posts').get();
     for(var map in snapshot.children) {
       final post = Post.fromJson(map.value as Map<Object?, Object?>);
-      if(post.video != null) {
-        print(post.id);
+      if(post.video != "null") {
         videoList.add(post);
       }
     }
-    print(videoList.length);
     return videoList;
   }
 }
