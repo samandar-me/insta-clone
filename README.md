@@ -1,6 +1,8 @@
-# insta_qlone
+# insta_clone
 
 A new Flutter project.
+
+<img width="100%" alt="image" src="https://github.com/samandar-me/my-portfolio/assets/95674842/f2d4373f-d98b-493c-92e1-4f2f5669ea29">
 
 ## Getting Started
 
