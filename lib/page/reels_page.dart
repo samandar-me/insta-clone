@@ -41,6 +41,7 @@ class _ReelsPageState extends State<ReelsPage> {
         builder: (context, snapshot) {
           if (snapshot.data != null && snapshot.data?.isNotEmpty == true) {
             final postList = snapshot.data ?? [];
+            print(postList[0].video);
             return Padding(
                 padding: const EdgeInsets.only(top: 40),
                 child: PageView.builder(
@@ -61,7 +62,7 @@ class _ReelsPageState extends State<ReelsPage> {
                         },
                       child: Stack(
                         children: [
-                          ReelVideo(video: postList[index].video),
+                          ReelVideo(video: "https://firebasestorage.googleapis.com/v0/b/instaqlone.appspot.com/o/post_images%2F1709201250690577?alt=media&token=de16dbc3-9220-4a4b-9c65-2891f0a54bf7"),
                           Positioned(bottom: 10, right: 10, child: _icons()),
                           Center(
                             child: _isLiked ? Lottie.asset('assets/json/anim.json',repeat: false) : null
